@@ -3,12 +3,13 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>AI Chat App</title>
+  <title>AI Chat — Powered by Groq</title>
   <link rel="stylesheet" href="style.css" />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet" />
 </head>
 <body>
   <div class="app">
+
     <!-- Sidebar -->
     <aside class="sidebar">
       <div class="sidebar-header">
@@ -26,14 +27,16 @@
           New Chat
         </button>
       </div>
+
       <div class="chat-history" id="chatHistory"></div>
+
       <div class="sidebar-footer">
-        <div class="api-key-section">
-          <label>OpenAI API Key</label>
-          <input type="password" id="apiKeyInput" placeholder="sk-..." />
-          <button onclick="saveApiKey()">Save</button>
+        <div class="powered-by">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/>
+          </svg>
+          Powered by <strong>Groq</strong>
         </div>
-        <p class="footer-note">Your key is stored locally only.</p>
       </div>
     </aside>
 
@@ -43,9 +46,10 @@
         <span id="chatTitle">New Conversation</span>
         <div class="model-select">
           <select id="modelSelect">
-            <option value="gpt-4o-mini">GPT-4o Mini</option>
-            <option value="gpt-4o">GPT-4o</option>
-            <option value="gpt-3.5-turbo">GPT-3.5 Turbo</option>
+            <option value="llama-3.3-70b-versatile">Llama 3.3 70B</option>
+            <option value="llama-3.1-8b-instant">Llama 3.1 8B (Fast)</option>
+            <option value="mixtral-8x7b-32768">Mixtral 8x7B</option>
+            <option value="gemma2-9b-it">Gemma 2 9B</option>
           </select>
         </div>
       </div>
@@ -54,17 +58,16 @@
         <div class="welcome">
           <div class="welcome-icon">
             <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-              <path d="M12 2a10 10 0 1 0 10 10A10 10 0 0 0 12 2zm0 18a8 8 0 1 1 8-8 8 8 0 0 1-8 8z"/>
-              <path d="M12 6a1 1 0 0 0-1 1v5a1 1 0 0 0 .293.707l3 3a1 1 0 0 0 1.414-1.414L13 11.586V7a1 1 0 0 0-1-1z"/>
+              <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/>
             </svg>
           </div>
           <h2>How can I help you today?</h2>
-          <p>Enter your OpenAI API key in the sidebar to get started.</p>
+          <p>Blazing fast AI powered by <strong>Groq</strong> ⚡</p>
           <div class="suggestions">
-            <button class="suggestion" onclick="useSuggestion('Explain quantum computing in simple terms')">U0001f9ea Explain quantum computing</button>
-            <button class="suggestion" onclick="useSuggestion('Write a Python function to sort a list')">U0001f40d Write Python code</button>
-            <button class="suggestion" onclick="useSuggestion('What are the best practices for REST APIs?')">U0001f310 REST API best practices</button>
-            <button class="suggestion" onclick="useSuggestion('Create a workout plan for beginners')">U0001f4aa Create a workout plan</button>
+            <button class="suggestion" onclick="useSuggestion('Explain quantum computing in simple terms')">🧪 Explain quantum computing</button>
+            <button class="suggestion" onclick="useSuggestion('Write a Python function to sort a list')">🐍 Write Python code</button>
+            <button class="suggestion" onclick="useSuggestion('What are the best practices for REST APIs?')">🌐 REST API best practices</button>
+            <button class="suggestion" onclick="useSuggestion('Create a workout plan for beginners')">💪 Create a workout plan</button>
           </div>
         </div>
       </div>
@@ -84,7 +87,7 @@
             </svg>
           </button>
         </div>
-        <p class="disclaimer">AI can make mistakes. Verify important information.</p>
+        <p class="disclaimer">Powered by Groq ⚡ — Responses may not always be accurate.</p>
       </div>
     </main>
   </div>

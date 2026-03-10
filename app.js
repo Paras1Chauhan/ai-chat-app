@@ -6,24 +6,12 @@ function generateId() {
   return Date.now().toString(36) + Math.random().toString(36).substr(2);
 }
 
-function getApiKey() {
-  return localStorage.getItem('openai_api_key') || '';
-}
-
-function saveApiKey() {
-  const key = document.getElementById('apiKeyInput').value.trim();
-  if (!key) return alert('Please enter a valid API key');
-  localStorage.setItem('openai_api_key', key);
-  document.getElementById('apiKeyInput').value = '';
-  showToast('API key saved!');
-}
-
-function showToast(msg) {
+function showToast(msg, color) {
   const t = document.createElement('div');
   t.textContent = msg;
-  t.style.cssText = 'position:fixed;bottom:24px;right:24px;background:#10a37f;color:white;padding:10px 18px;border-radius:8px;font-size:13px;z-index:9999;animation:fadeIn 0.2s ease';
+  t.style.cssText = `position:fixed;bottom:24px;right:24px;background:${color || '#f97316'};color:white;padding:10px 18px;border-radius:8px;font-size:13px;z-index:9999;box-shadow:0 4px 12px rgba(0,0,0,0.2)`;
   document.body.appendChild(t);
-  setTimeout(() => t.remove(), 2500);
+  setTimeout(() => t.remove(), 2800);
 }
 
 function newChat() {
@@ -33,12 +21,11 @@ function newChat() {
     <div class="welcome">
       <div class="welcome-icon">
         <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-          <circle cx="12" cy="12" r="10"/>
-          <path d="M12 6v6l4 2"/>
+          <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/>
         </svg>
       </div>
       <h2>How can I help you today?</h2>
-      <p>Enter your OpenAI API key in the sidebar to get started.</p>
+      <p>Blazing fast AI powered by <strong>Groq</strong> ⚡</p>
       <div class="suggestions">
         <button class="suggestion" onclick="useSuggestion('Explain quantum computing in simple terms')">🧪 Explain quantum computing</button>
         <button class="suggestion" onclick="useSuggestion('Write a Python function to sort a list')">🐍 Write Python code</button>
@@ -100,7 +87,7 @@ function appendMessage(role, content) {
   if (welcome) welcome.remove();
   const div = document.createElement('div');
   div.className = `message ${role}`;
-  const avatar = role === 'user' ? 'P' : '🤖';
+  const avatar = role === 'user' ? 'P' : '⚡';
   div.innerHTML = `
     <div class="avatar">${avatar}</div>
     <div class="bubble">${formatContent(content)}</div>`;
@@ -124,20 +111,18 @@ async function sendMessage() {
   const text = input.value.trim();
   if (!text) return;
 
-  const apiKey = getApiKey();
-  if (!apiKey) {
-    showToast('⚠️ Please save your OpenAI API key first!');
-    return;
-  }
-
   isLoading = true;
   document.getElementById('sendBtn').disabled = true;
   input.value = '';
   input.style.height = 'auto';
 
-  // Create conversation if new
+  // Create new conversation if needed
   if (!currentConvId) {
-    const conv = { id: generateId(), title: text.slice(0, 40) + (text.length > 40 ? '...' : ''), messages: [] };
+    const conv = {
+      id: generateId(),
+      title: text.slice(0, 40) + (text.length > 40 ? '...' : ''),
+      messages: []
+    };
     conversations.push(conv);
     currentConvId = conv.id;
     document.getElementById('chatTitle').textContent = conv.title;
@@ -152,38 +137,40 @@ async function sendMessage() {
   const msgs = document.getElementById('messages');
   const typingDiv = document.createElement('div');
   typingDiv.className = 'message assistant';
-  typingDiv.innerHTML = `<div class="avatar">🤖</div><div class="bubble"><div class="typing-indicator"><span></span><span></span><span></span></div></div>`;
+  typingDiv.innerHTML = `<div class="avatar">⚡</div><div class="bubble"><div class="typing-indicator"><span></span><span></span><span></span></div></div>`;
   msgs.appendChild(typingDiv);
   msgs.scrollTop = msgs.scrollHeight;
 
   try {
     const model = document.getElementById('modelSelect').value;
-    const response = await fetch('https://api.openai.com/v1/chat/completions', {
+
+    // Call our Vercel serverless function — API key is secured server-side
+    const response = await fetch('/api/chat', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${apiKey}` },
+      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         model,
-        messages: conv.messages.map(m => ({ role: m.role, content: m.content })),
-        max_tokens: 1500,
-        temperature: 0.7
+        messages: conv.messages.map(m => ({ role: m.role, content: m.content }))
       })
     });
 
+    const data = await response.json();
+
     if (!response.ok) {
-      const err = await response.json();
-      throw new Error(err.error?.message || 'API request failed');
+      throw new Error(data.error || 'Something went wrong');
     }
 
-    const data = await response.json();
     const reply = data.choices[0].message.content;
     typingDiv.remove();
     appendMessage('assistant', reply);
     conv.messages.push({ role: 'assistant', content: reply });
     localStorage.setItem('conversations', JSON.stringify(conversations));
+
   } catch (err) {
     typingDiv.remove();
     const errDiv = appendMessage('assistant', '');
     errDiv.querySelector('.bubble').innerHTML = `<div class="error-msg">❌ ${err.message}</div>`;
+    showToast('❌ ' + err.message);
   }
 
   isLoading = false;
@@ -191,9 +178,6 @@ async function sendMessage() {
   input.focus();
 }
 
-// Load saved API key on start
 window.onload = () => {
-  const savedKey = getApiKey();
-  if (savedKey) document.getElementById('apiKeyInput').placeholder = 'API key saved ✓';
   renderHistory();
 };
